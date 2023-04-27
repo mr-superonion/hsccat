@@ -20,6 +20,24 @@ def get_snr(catalog, band="i"):
 
 
 def get_sdss_inc_angle(catalog, psf_deconv=False):
+    """This utility derives the inclination angle from the SDSS shape
+    Args:
+        catalog (ndarray):  Simulation or data catalog
+        psf_deconv (bool):  Whether removing PSF effect
+    Returns:
+        inc (ndarray):      galaxy's inclination angle
+    """
+    # to be implement
+    pass
+
+
+def get_sdss_resolution(catalog):
+    """This utility derives the galaxy resolution
+    Args:
+        catalog (ndarray):      Simulation or data catalog
+    Returns:
+        resolution (ndarray):   galaxy's resolution
+    """
     # to be implement
     pass
 

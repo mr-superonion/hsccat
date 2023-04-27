@@ -8,6 +8,7 @@
 
 # ANALYSIS
 
++ install the code in your computer by `pip instll -e .` under this directory;
 + Selection of galaxies since we need to select galaxies with high-SNR and
   resolution for accurate shape and magnitude estimation (see [this
   notebook]());
