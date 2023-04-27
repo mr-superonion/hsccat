@@ -3,14 +3,10 @@ from setuptools import setup, find_packages
 __version__ = ""
 
 
-# scripts = [
-#     "bin/impt_config",
-#     "bin/impt_process_fpfs_sim.py",
-# ]
 scripts = []
 
 setup(
-    name="impt",
+    name="hsccat",
     version=__version__,
     description="simple code to play with HSC catalog",
     author="mr superonion",
@@ -18,6 +14,9 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "numpy",
+        "astropy",
+        "scipy",
+        "matplotlib",
     ],
     packages=find_packages(),
     scripts=scripts,

@@ -1,10 +1,21 @@
 import numpy as np
 
 
+def get_mag(catalog, band="i"):
+    """This utility gets the cmodel magnitude
+
+    Args:
+        catalog (ndarray):  Simulation or data catalog
+    """
+    return catalog["%s_cmodel_mag" % band] - catalog["a_%s" % band]
+
+
 def get_snr(catalog, band="i"):
     """This utility computes the S/N for each object in the catalog, based on
-    cmodel_flux. It does not impose any cuts and returns NaNs for invalid S/N
-    values.
+    cmodel_flux.
+
+    Args:
+        catalog (ndarray):  Simulation or data catalog
     """
     if "snr" in catalog.dtype.names:
         return catalog["snr"]
@@ -19,8 +30,33 @@ def get_snr(catalog, band="i"):
     return snr
 
 
+def get_log_blendness(catalog):
+    """This utility gets the log of i-band blendedness, which quantify how much
+    the galaxy is inflenced by blending
+
+    Args:
+        catalog (ndarray):  Simulation or data catalog
+    """
+    if "logb" in catalog.dtype.names:
+        logb = catalog["logb"]
+    elif "base_Blendedness_abs" in catalog.dtype.names:  # pipe 7
+        logb = np.log10(np.maximum(catalog["base_Blendedness_abs"], 1.0e-6))
+    elif "i_blendedness_abs_flux" in catalog.dtype.names:  # s18
+        logb = np.log10(np.maximum(catalog["i_blendedness_abs_flux"], 1.0e-6))
+    elif "i_blendedness_abs" in catalog.dtype.names:  # s19
+        logb = np.log10(np.maximum(catalog["i_blendedness_abs"], 1.0e-6))
+    elif "iblendedness_abs_flux" in catalog.dtype.names:  # s15
+        logb = np.log10(np.maximum(catalog["iblendedness_abs_flux"], 1.0e-6))
+    else:
+        raise ValueError(
+            "Cannot derive the log of blendness from this catalog"
+        )
+    return logb
+
+
 def get_sdss_inc_angle(catalog, psf_deconv=False):
     """This utility derives the inclination angle from the SDSS shape
+
     Args:
         catalog (ndarray):  Simulation or data catalog
         psf_deconv (bool):  Whether removing PSF effect
@@ -31,20 +67,28 @@ def get_sdss_inc_angle(catalog, psf_deconv=False):
     pass
 
 
-def get_sdss_resolution(catalog):
-    """This utility derives the galaxy resolution
+def get_sdss_resolution(catalog, band="i"):
+    """This utility derives the galaxy resolution from a catalog from the
+    second-order moment matrix.
+
     Args:
         catalog (ndarray):      Simulation or data catalog
     Returns:
         resolution (ndarray):   galaxy's resolution
     """
-    # to be implement
-    pass
+    pn11 = "%s_sdssshape_psf_shape11" % band
+    pn22 = "%s_sdssshape_psf_shape22" % band
+    gn11 = "%s_sdssshape_shape11" % band
+    gn22 = "%s_sdssshape_shape22" % band
+    trace_psf = (catalog[pn11] + catalog[pn22])
+    trace_obs = (catalog[gn11] + catalog[gn22])
+    return 1. - trace_psf / trace_obs
 
 
 def get_sdss_size(catalog, dtype="det"):
-    """This utility gets the observed galaxy size from a data or sims catalog
-    using the specified size definition from the second moments matrix.
+    """This utility gets the observed galaxy size from a catalog
+    using the specified size definition from the second-order moments matrix.
+
     Args:
         catalog (ndarray):  Simulation or data catalog
         dtype (str):        Type of psf size measurement in
@@ -74,20 +118,3 @@ def get_sdss_size(catalog, dtype="det"):
     else:
         raise ValueError("Unknown PSF size type: %s" % dtype)
     return size
-
-
-def get_log_blendness(catalog):
-    """Returns the log of i-band blendedness"""
-    if "logb" in catalog.dtype.names:
-        logb = catalog["logb"]
-    elif "base_Blendedness_abs" in catalog.dtype.names:  # pipe 7
-        logb = np.log10(np.maximum(catalog["base_Blendedness_abs"], 1.0e-6))
-    elif "i_blendedness_abs_flux" in catalog.dtype.names:  # s18
-        logb = np.log10(np.maximum(catalog["i_blendedness_abs_flux"], 1.0e-6))
-    elif "i_blendedness_abs" in catalog.dtype.names:  # s19
-        logb = np.log10(np.maximum(catalog["i_blendedness_abs"], 1.0e-6))
-    elif "iblendedness_abs_flux" in catalog.dtype.names:  # s15
-        logb = np.log10(np.maximum(catalog["iblendedness_abs_flux"], 1.0e-6))
-    else:
-        raise ValueError("Cannot derive the log of blendness from this catalog")
-    return logb
